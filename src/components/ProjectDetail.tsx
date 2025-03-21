@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, ExternalLink, Github, Tag } from "lucide-react";
@@ -97,7 +96,10 @@ const ProjectDetail = () => {
         
         <div className="neo-card p-8 mb-8">
           <h2 className="text-2xl font-bold mb-4">About this project</h2>
-          <p className="text-gray-600 leading-relaxed whitespace-pre-line">{project.description}</p>
+          <div 
+            className="text-gray-600 leading-relaxed prose prose-lg max-w-none"
+            dangerouslySetInnerHTML={{ __html: project.description }}
+          />
         </div>
         
         {project.demoUrl && (

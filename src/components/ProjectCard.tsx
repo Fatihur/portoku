@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ExternalLink } from "lucide-react";
@@ -50,7 +49,10 @@ const ProjectCard = ({ project, index }: ProjectCardProps) => {
           ))}
         </div>
         <h3 className="text-xl font-bold mb-2 truncate">{project.title}</h3>
-        <p className="text-gray-600 mb-4 line-clamp-2">{project.description}</p>
+        <div 
+          className="text-gray-600 mb-4 line-clamp-2 prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: project.description }}
+        />
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-500">{project.date}</span>
           <Link 

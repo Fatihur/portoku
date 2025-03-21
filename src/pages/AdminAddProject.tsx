@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -8,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Trash } from "lucide-react";
+import { Plus, Trash, ArrowLeft } from "lucide-react";
 import { db } from "../firebase/config";
 import { doc, getDoc, setDoc, collection, deleteDoc } from "firebase/firestore";
 import Layout from "../components/Layout";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface ProjectFormData {
   title: string;
@@ -84,9 +85,13 @@ const AdminAddProject = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    setFormData(prev => ({ ...prev, description: value }));
   };
 
   const handleAddTag = () => {
@@ -143,8 +148,10 @@ const AdminAddProject = () => {
 
   const saveProjectToFirestore = async (projectData: any) => {
     try {
+      console.log("Mencoba menyimpan data:", projectData);
       if (id) {
         // Update existing project
+        console.log("Mengupdate project dengan ID:", id);
         await setDoc(doc(db, "projects", id), projectData);
         toast({
           title: "Success",
@@ -152,6 +159,7 @@ const AdminAddProject = () => {
         });
       } else {
         // Add new project with a generated ID
+        console.log("Membuat project baru");
         const newDocRef = doc(collection(db, "projects"));
         await setDoc(newDocRef, projectData);
         toast({
@@ -167,7 +175,7 @@ const AdminAddProject = () => {
       console.error("Firestore save error:", error);
       toast({
         title: "Firestore Error",
-        description: "Failed to save project data to Firestore.",
+        description: `Failed to save project data to Firestore: ${error.message}`,
         variant: "destructive"
       });
     }
@@ -206,7 +214,17 @@ const AdminAddProject = () => {
   return (
     <Layout>
       <div className="container mx-auto py-10 px-4">
-        <h1 className="text-3xl font-bold mb-4">{id ? "Edit Project" : "Add New Project"}</h1>
+        <div className="flex items-center gap-4 mb-6">
+          <Link 
+            to="/admin/projects" 
+            className="inline-flex items-center gap-2 text-neo-blue hover:underline"
+          >
+            <ArrowLeft size={20} />
+            Back to Projects
+          </Link>
+          <Separator orientation="vertical" className="h-6" />
+          <h1 className="text-3xl font-bold">{id ? "Edit Project" : "Add New Project"}</h1>
+        </div>
         <Separator className="mb-6" />
 
         {loading ? (
@@ -227,14 +245,22 @@ const AdminAddProject = () => {
             </div>
             <div>
               <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-                className="neo-input"
-              />
+              <div className="neo-input min-h-[200px]">
+                <ReactQuill
+                  value={formData.description}
+                  onChange={handleDescriptionChange}
+                  className="h-[150px]"
+                  modules={{
+                    toolbar: [
+                      [{ 'header': [1, 2, 3, false] }],
+                      ['bold', 'italic', 'underline', 'strike'],
+                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                      ['link', 'image'],
+                      ['clean']
+                    ]
+                  }}
+                />
+              </div>
             </div>
             <div>
               <Label htmlFor="date">Date</Label>
